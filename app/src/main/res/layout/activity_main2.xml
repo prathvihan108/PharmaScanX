@@ -11,4 +11,17 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="?attr/actionBarTheme" />
+    <LinearLayout
+        android:layout_marginTop="80dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textview1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </TextView>
+
+    </LinearLayout>
 </RelativeLayout>

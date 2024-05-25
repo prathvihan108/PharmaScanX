@@ -3,6 +3,7 @@ package com.prathvihan1008.pharmascanx
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 
 class MainActivity2 : AppCompatActivity() {
@@ -16,6 +17,16 @@ class MainActivity2 : AppCompatActivity() {
         // Show the back button in the toolbar
         //Hello
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        val wordList = intent.getStringArrayListExtra("wordList")
+
+        // Convert the list of words to a single string
+        val textToShow = wordList?.joinToString(" ")
+
+        // Find the TextView in the layout
+        val textView1 = findViewById<TextView>(R.id.textview1)
+
+        // Set the text to the TextView
+        textView1.text = textToShow
 
     }
 

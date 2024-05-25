@@ -14,6 +14,7 @@ class MainActivity2 : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         // Show the back button in the toolbar
+        //Hello
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
     }

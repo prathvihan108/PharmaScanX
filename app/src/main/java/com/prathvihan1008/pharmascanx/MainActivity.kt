@@ -10,6 +10,10 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private var editText: EditText? = null
     private lateinit var selectedImageView: ImageView
     private lateinit var selectedImageBitmap: Bitmap
+    private var flagImageLoaded=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,25 +72,73 @@ class MainActivity : AppCompatActivity() {
                 // Also, you can use content resolver to load the image bitmap if needed
                 selectedImageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
             }
+
+            flagImageLoaded=1
+
         }
     }
 
-    fun sendData(view: View) {
-        // Use the selectedImageBitmap and editText.text.toString() for further processing
-        // For example, you can pass these values to your Google ML OCR for text extraction
+    fun recognizeTextFromImage(bitmap: Bitmap, callback: (Text) -> Unit) {
+        val image = InputImage.fromBitmap(bitmap, 0)
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-        // Create an Intent to start the next activity
-        val intent = Intent(this, MainActivity2::class.java)
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
 
-        // Pass data to the next activity if needed
-//        intent.putExtra("imageBitmap", selectedImageBitmap)
-//        intent.putExtra("text", editText?.text.toString())
+                callback(visionText)
+            }
+            .addOnFailureListener { exception ->
+                exception.printStackTrace()
 
-        // Start the next activity
-        startActivity(intent)
+            }
     }
 
 
+
+
+    fun sendData(view: View) {
+
+        if(flagImageLoaded==1 && editText?.text.toString().trim().isEmpty()) {
+            recognizeTextFromImage(selectedImageBitmap) { text ->
+                val wordList = mutableListOf<String>()
+
+                // Extract individual words from the recognized text
+                for (block in text.textBlocks) {
+                    for (line in block.lines) {
+                        for (element in line.elements) {
+                            wordList.add(element.text)
+                        }
+                    }
+                }
+
+                // Pass the list of words to the next activity
+                val intent = Intent(this, MainActivity2::class.java)
+                intent.putStringArrayListExtra("wordList", ArrayList(wordList))
+                startActivity(intent)
+            }
+        }
+
+        else if(!editText?.text.toString().trim().isEmpty() && flagImageLoaded==0){
+            // Get the text from the EditText
+            val editTextContent = editText?.text.toString().trim()
+// Create a string array with a single element
+            val textArray = arrayOf(editTextContent)
+
+// Convert the string array to an ArrayList
+            val arrayList = ArrayList(textArray.asList())
+
+// Start the next activity and pass the ArrayList as an extra
+            val intent = Intent(this, MainActivity2::class.java)
+            intent.putStringArrayListExtra("wordList", arrayList)
+            startActivity(intent)
+        }
+        else if(!editText?.text.toString().trim().isEmpty() && flagImageLoaded==1) {
+            Toast.makeText(this,"please choose only one input ",Toast.LENGTH_LONG).show()
+        }
+        else{
+            Toast.makeText(this,"please select the picture or enter the drug name",Toast.LENGTH_LONG).show()
+        }
+    }
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
